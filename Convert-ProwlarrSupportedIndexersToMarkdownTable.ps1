@@ -141,10 +141,17 @@ tags: prowlarr, indexers
 editor: markdown
 dateCreated: $date
 ---"
+$wiki_page_version =
+"`r`n---`r`n
+- Current `Master` Version | ![Current Master/Stable](https://img.shields.io/badge/dynamic/json?color=f5f5f5&style=flat-square&label=&query=%24.version&url=https://raw.githubusercontent.com/hotio/prowlarr/latest/VERSION.json)
+- Current `Develop` Version | ![Current Develop/Beta](https://img.shields.io/badge/dynamic/json?color=f5f5f5&style=flat-square&label=&query=%24.version&url=https://raw.githubusercontent.com/hotio/prowlarr/testing/VERSION.json)
+- Current `Nightly` Version | ![Current Nightly/Alpha](https://img.shields.io/badge/dynamic/json?color=f5f5f5&style=flat-square&label=&query=%24.version&url=https://raw.githubusercontent.com/hotio/prowlarr/nightly/VERSION.json)
+`r`n---
+"
 Write-Information 'Wiki Page pieces built'
 ## Build and Output Page
 ## We replace because converting to markdown escaped the `\` as `\\` and thus `\\\\` is `\\` in file (due to regex)
-$wiki_page_file = ((($mdHeader + $wiki_1newline + $wiki_page_start + $wiki_1newline + $tbl_fmt_tor + $tbl_fmt_use) -replace '\\\\', '\') -replace '---', '---').Trim()
+$wiki_page_file = ((($mdHeader + $wiki_1newline + $wiki_page_start + $wiki_1newline + $wiki_page_version + $tbl_fmt_tor + $tbl_fmt_use) -replace '\\\\', '\') -replace '---', '---').Trim()
 Write-Information 'Wiki Page Built'
 $wiki_page_file | Out-File $OutputFile -Encoding $wiki_encoding
 Write-Information 'Wiki Page Output'
