@@ -5,7 +5,7 @@
         Name: Convert-ProwlarrSupportedIndexersToMarkdownTable.ps1
         The purpose of this script is to export a markdown table for the wiki of the available indexers
     .DESCRIPTION
-        Grabs build number and available indexers from a local or remotely installed Prowlarr instance. Requires Commit Hash and App API Key
+        Grabs build number and available indexers from a local or remotely installed Prowlarr instance. Requires App API Key. Gets latest commit from Github if Commit is not passed
     .NOTES
         This script has been tested on Windows PowerShell 7.1.3
     .EXAMPLE
@@ -20,7 +20,7 @@
 
 [CmdletBinding()]
 param (
-    [Parameter(Mandatory, Position = 1)]
+    [Parameter(Position = 1)]
     [string]$Commit,
     [Parameter(Position = 2)]
     [string]$Build,
@@ -52,7 +52,7 @@ $wiki_link = 'https://wiki.servarr.com'
 $wiki_app_path = '/prowlarr'
 $wiki_page = 'supported-indexers'
 $wiki_bookmark = '#'
-### Page Formating
+### Page Formatting
 $markdown_escape_regex = '(\w)(\.|\[|\])(\w)'
 $markdown_escape_regex_rep = '$1\$2$3'
 $wiki_1newline = "`r`n"
@@ -88,8 +88,25 @@ $indexer_name_exp = { IF ($_.IndexerUrls) { '[' + ($_.name -replace $markdown_es
 $usenet_indexer_name_exp = { IF ($_.IndexerUrls) { '[' + ($_.name -replace $markdown_escape_regex, $markdown_escape_regex_rep) + '](' + ($_.IndexerUrls[0]) + ')' + '{#' + $_.infoLink.Replace($wiki_infolink.ToString(), '') + '}' } Else { IF ($_.fields.value[0]) { '[' + ($_.name -replace $markdown_escape_regex, $markdown_escape_regex_rep) + '](' + ($_.fields.value[0].Replace('api.', '').Replace('feed.', '')) + ')' + '{#' + $_.infoLink.Replace($wiki_infolink.ToString(), '') + '}' } Else { ($_.name -replace $markdown_escape_regex, $markdown_escape_regex_rep) + '{#' + $_.infoLink.Replace($wiki_infolink.ToString(), '') + '}' } } }
 $indexer_description_exp = { ($_.description -replace $markdown_escape_regex, $markdown_escape_regex_rep) }
 
+
+$gh_app_org = 'Prowlarr'
+$gh_app_repo = 'Prowlarr'
+$gh_repo_org = $gh_app_org + '/' + $gh_app_repo + '/'
 ## Determine Commit
+if ( $PSBoundParameters.ContainsKey('commit') )
+{
+        Write-Information "Commit passed from argument. Skipping Github Query"
+}
+else
+
+{
+    $gh_url = ('https://api.github.com/repos/' + $gh_repo_org + 'commits')
+    Write-Information "Getting commit info from Github [$gh_url]"
+    $github_req = Invoke-RestMethod -Uri $gh_url -ContentType 'application/json' -Method Get
+    $commit = ($github_req | select-object -first 1).sha
+}
 Write-Information "Commit is $commit"
+## Determine Commit
 
 ## Determine Version (Build)
 Write-Information 'Determining Build'
