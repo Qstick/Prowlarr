@@ -388,6 +388,7 @@
   "TestAll": "Test All",
   "TestAllApps": "Test All Apps",
   "TestAllClients": "Test All Clients",
+  "ThemeHelpText": "Change Prowlarr UI theme, inspired by {0}",
   "Time": "Time",
   "Title": "Title",
   "Today": "Today",

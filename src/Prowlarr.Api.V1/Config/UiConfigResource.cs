@@ -18,6 +18,7 @@ namespace Prowlarr.Api.V1.Config
         public bool EnableColorImpairedMode { get; set; }
         public int MovieInfoLanguage { get; set; }
         public int UILanguage { get; set; }
+        public string Theme { get; set; }
     }
 
     public static class UiConfigResourceMapper
@@ -36,7 +37,8 @@ namespace Prowlarr.Api.V1.Config
 
                 EnableColorImpairedMode = model.EnableColorImpairedMode,
                 MovieInfoLanguage = model.MovieInfoLanguage,
-                UILanguage = model.UILanguage
+                UILanguage = model.UILanguage,
+                Theme = model.Theme
             };
         }
     }

@@ -115,6 +115,12 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("ListSyncLevel", value); }
         }
 
+        public string Theme
+        {
+            get { return GetValue("Theme", "light"); }
+            set { SetValue("Theme", value); }
+        }
+
         public string ImportExclusions
         {
             get { return GetValue("ImportExclusions", string.Empty); }
