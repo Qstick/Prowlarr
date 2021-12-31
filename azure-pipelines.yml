@@ -57,7 +57,6 @@ stages:
           git config --global user.name "Servarr"
           git checkout -b api-docs
           git add .
-          if git status | grep -q modified
           curl -X POST -H "Authorization: token ${GITHUBTOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/prowlarr/prowlarr/pulls -d '{"head":"api-docs","base":"develop","title":"Update API docs"}'
         displayName: Commit API Doc Change
         continueOnError: true
