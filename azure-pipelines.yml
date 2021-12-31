@@ -32,67 +32,22 @@ pr:
     - src/Prowlarr.API.*/openapi.json
 
 stages:
-  - stage: Setup
-    displayName: Setup
-    jobs:
-    - job:
-      displayName: Build Variables
-      pool:
-        vmImage: 'ubuntu-18.04'
-      steps:
-      # Set the build name properly.  The 'name' property won't recursively expand so hack here:
-      - bash: echo "##vso[build.updatebuildnumber]$PROWLARRVERSION"
-        displayName: Set Build Name
-      - bash: |
-          if [[ $BUILD_REASON == "PullRequest" ]]; then
-          git diff origin/develop...HEAD  --name-only | grep -E "^(src/|azure-pipelines.yml)"
-          echo $? > not_backend_update
-          else
-          echo 0 > not_backend_update
-          fi
-          cat not_backend_update
-        displayName: Check for Backend File Changes
-      - publish: not_backend_update
-        artifact: not_backend_update
-        displayName: Publish update type
-
   - stage: Analyze
-    dependsOn:
-    - Setup
     displayName: Analyze
 
     jobs:
-    - job: Prepare
-      pool:
-        vmImage: 'ubuntu-18.04'
-      steps:
-      - checkout: none
-      - task: DownloadPipelineArtifact@2
-        inputs:
-          buildType: 'current'
-          artifactName: 'not_backend_update'
-          targetPath: '.'
-      - bash: echo "##vso[task.setvariable variable=backendNotUpdated;isOutput=true]$(cat not_backend_update)"
-        name: setVar
-
     - job: Api_Docs
       displayName: API Docs
-      dependsOn: Prepare
       condition: |
         and
         (
-          and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop')),
-          and(succeeded(), eq(dependencies.Prepare.outputs['setVar.backendNotUpdated'], '0'))
+          succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop')
         )
 
       pool:
         vmImage: windows-2019
 
       steps:
-      - task: UseDotNet@2
-        displayName: 'Install .net core'
-        inputs:
-          version: $(dotnetVersion)
       - checkout: self
         submodules: true
         persistCredentials: true
@@ -103,11 +58,7 @@ stages:
           git checkout -b api-docs
           git add .
           if git status | grep -q modified
-          then
-            curl -X POST -H "Authorization: token ${GITHUBTOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/prowlarr/prowlarr/pulls -d '{"head":"api-docs","base":"develop","title":"Update API docs"}'
-          else
-            echo "No changes since last run"
-          fi
+          curl -X POST -H "Authorization: token ${GITHUBTOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/prowlarr/prowlarr/pulls -d '{"head":"api-docs","base":"develop","title":"Update API docs"}'
         displayName: Commit API Doc Change
         continueOnError: true
         env:
